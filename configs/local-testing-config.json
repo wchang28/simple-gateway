@@ -1,0 +1,27 @@
+{
+    "adminServerConfig": {
+        "http": {
+            "host": "0.0.0.0",
+            "port": 8081
+        }
+    },
+    "proxyServerConfig": {
+        "http": {
+            "host": "0.0.0.0",
+            "port": 8080
+        }
+    },
+    "availableApiServerPorts": [
+        13457
+        ,13458
+    ],
+    "spawnParams": {
+        "command": "node",
+        "args": [
+            "C:\\dev\\crowdsourcing-api-server\\js\\app.js"
+        ],
+        "env": {
+            "NODE_PATH": "C:\\test\\crowdsourcing-api-extensions"
+        }
+    }
+}    
