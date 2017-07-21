@@ -2,6 +2,8 @@ import * as express from 'express';
 import {IGlobal} from "./global";
 import * as http from "http";
 import {IStateMachine, Server} from "./state-machine";
+import {ISettingsStore} from "./settings-store";
+import {SpawnParams} from "./server-mgr";
 
 interface RequestInfo {
     apiServer?: Server;
@@ -30,6 +32,7 @@ export class RequestData {
     }
     
     get StateMachine() : IStateMachine {return this.Global.stateMachine;}
+    get SpawnParamsStore(): ISettingsStore<SpawnParams> {return this.Global.spawnParamsStore;}
 
     get APIServer(): Server {return this.RequestInfo.apiServer;}
     set APIServer(value: Server) {this.RequestInfo.apiServer = value;}

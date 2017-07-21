@@ -14,6 +14,7 @@ import {IGlobal} from "./global";
 import {Router as servicesRouter} from "./services";
 import * as proxy from "express-http-proxy";
 import {ServerId} from "./types";
+import {SettingsStore} from "./settings-store";
 
 let configFile: string = null;
 
@@ -24,20 +25,17 @@ else
 
 let config: IAppConfig = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
-class SpawnParamsSrc implements srvMgr.ISpawnParamsSrc {
-    constructor(private filePath: string) {}
-    get() : Promise<srvMgr.SpawnParams> {
-        try {
-            let spawnParams: srvMgr.SpawnParams = JSON.parse(fs.readFileSync(this.filePath, 'utf8'));
-            return Promise.resolve<srvMgr.SpawnParams>(spawnParams);
-        } catch(e) {
-            return Promise.reject({error: "internal-server-error", error_description: "error loading file " + this.filePath + ": " + e.toString()});
-        }
+class SpawnParamsStore extends SettingsStore<srvMgr.SpawnParams> implements srvMgr.ISpawnParamsSrc {
+    constructor(filePath: string) {
+        super(filePath);
     }
+    get() : Promise<srvMgr.SpawnParams> {return this.load();}
 }
 
+let spawnParamsStore = new SpawnParamsStore(config.spawnParamsFile);
+
 let monitor = getServerMonitor();
-let serverManager = srvMgr.get(config.availableApiServerPorts, new SpawnParamsSrc(config.spawnParamsFile), monitor);
+let serverManager = srvMgr.get(config.availableApiServerPorts, spawnParamsStore, monitor);
 let stateMachine = sm.get(serverManager);
 
 monitor.on("pooling", (InstanceId: ServerId, InstanceUrl: string) => {
@@ -93,6 +91,7 @@ appAdmin.use(prettyPrinter.get());
 
 let g: IGlobal = {
     stateMachine
+    ,spawnParamsStore
 };
 
 appAdmin.set("global", g);
