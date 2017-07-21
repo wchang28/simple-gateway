@@ -1,0 +1,9 @@
+{
+    "command": "node",
+    "args": [
+        "C:\\dev\\crowdsourcing-api-server\\js\\app.js"
+    ],
+    "env": {
+        "NODE_PATH": "C:\\test\\crowdsourcing-api-extensions"
+    }
+}

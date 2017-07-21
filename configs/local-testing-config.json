@@ -15,13 +15,5 @@
         13457
         ,13458
     ],
-    "spawnParams": {
-        "command": "node",
-        "args": [
-            "C:\\dev\\crowdsourcing-api-server\\js\\app.js"
-        ],
-        "env": {
-            "NODE_PATH": "C:\\test\\crowdsourcing-api-extensions"
-        }
-    }
+    "spawnParamsFile": "C:/dev/simple-gateway/configs/testing-spawn-params.json"
 }    

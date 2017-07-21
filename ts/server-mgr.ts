@@ -12,6 +12,10 @@ export interface SpawnParams {
     env?: {[key: string]: string};
 }
 
+export interface ISpawnParamsSrc {
+    get() : Promise<SpawnParams>;
+}
+
 export interface IServerMonitor {
     monitor(InstanceId: ServerId, InstanceUrl: string) : void;
     on(event: "instance-ready", listener: (InstanceId: ServerId) => void) : this;
@@ -33,7 +37,7 @@ interface PortItem {
 
 class ServerManager extends events.EventEmitter implements IServerManager {
     private _ports: [PortItem, PortItem];
-    constructor(availablePorts: [number, number], private spawnParams: SpawnParams, private serverMonitor: IServerMonitor) {
+    constructor(availablePorts: [number, number], private spawnParamsSrc: ISpawnParamsSrc, private serverMonitor: IServerMonitor) {
         super();
         this._ports = [{Port:availablePorts[0], InstanceId: null}, {Port:availablePorts[1], InstanceId: null}];
         this.serverMonitor.on("instance-ready", (InstanceId: ServerId) => {
@@ -46,15 +50,17 @@ class ServerManager extends events.EventEmitter implements IServerManager {
         return this._ports[index].Port;
     }
     private launchNewApiServerInstance(InstanceId: ServerId, Port: number) : Promise<number> {
-        let args: string[] = (this.spawnParams.args ? this.spawnParams.args : []);
-        let env:{[key: string]: string} = {};
-        if (this.spawnParams.env) {
-            for (let key in this.spawnParams.env)
-                env[key] = this.spawnParams.env[key];
-        }
-        env["PORT"] = Port.toString();  // add listen port to the environmental variables
-        let childProcess = cp.spawn(this.spawnParams.command, args, {env});
-        return Promise.resolve<any>(childProcess.pid);
+        return this.spawnParamsSrc.get().then((spawnParams: SpawnParams) => {
+            let args: string[] = (spawnParams.args ? spawnParams.args : []);
+            let env:{[key: string]: string} = {};
+            if (spawnParams.env) {
+                for (let key in spawnParams.env)
+                    env[key] = spawnParams.env[key];
+            }
+            env["PORT"] = Port.toString();  // add listen port to the environmental variables
+            let childProcess = cp.spawn(spawnParams.command, args, {env});
+            return childProcess.pid;
+        });
     }
     launchNewInstance() : Promise<sm.ServerInstance> {
         let InstanceId = generate();
@@ -64,7 +70,7 @@ class ServerManager extends events.EventEmitter implements IServerManager {
         this.serverMonitor.monitor(InstanceId, InstanceUrl);
         return this.launchNewApiServerInstance(InstanceId, Port).then((pid: number) => {
             let ServerInstnace: sm.ServerInstance = {Id: InstanceId, InstanceUrl, pid};
-            return Promise.resolve<sm.ServerInstance>(ServerInstnace)
+            return ServerInstnace;
         });  
     }
     terminateInstance(InstanceId: string, pid: number) : void {
@@ -81,4 +87,4 @@ class ServerManager extends events.EventEmitter implements IServerManager {
     }
 }
 
-export function get(availablePorts: [number, number], spawnParams: SpawnParams, serverMonitor: IServerMonitor) : IServerManager {return new ServerManager(availablePorts, spawnParams, serverMonitor);}
+export function get(availablePorts: [number, number], spawnParamsSrc: ISpawnParamsSrc, serverMonitor: IServerMonitor) : IServerManager {return new ServerManager(availablePorts, spawnParamsSrc, serverMonitor);}

@@ -6,5 +6,5 @@ export interface IAppConfig {
     adminServerConfig: IWebServerConfig;
     proxyServerConfig: IWebServerConfig;
     availableApiServerPorts: [number, number];
-    spawnParams: SpawnParams;
+    spawnParamsFile: string;
 }
