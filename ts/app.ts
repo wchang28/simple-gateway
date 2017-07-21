@@ -46,6 +46,8 @@ monitor.on("pooling", (InstanceId: ServerId, InstanceUrl: string) => {
 
 serverManager.on("instance-launching", (InstanceId: ServerId, InstanceUrl: string) => {
     console.log(new Date().toISOString() + ": <<LAUNCHING>> launching new server instance " + InstanceId + " on " + InstanceUrl + "...");
+}).on("instance-launching-spawn-params", (InstanceId: ServerId, spawnParams: srvMgr.SpawnParams) => {
+    console.log(new Date().toISOString() + ": <<LAUNCHING-SPAWN-PARAMS>> launching new server instance " + InstanceId + " with\n" + JSON.stringify(spawnParams, null, 2));
 }).on("instance-launched", (InstanceId: ServerId) => {
     console.log(new Date().toISOString() + ": <<LAUNCHED>> new server instance " + InstanceId + " is now READY :-)");
 }).on("instance-terminating", (InstanceId: ServerId, pid: number) => {

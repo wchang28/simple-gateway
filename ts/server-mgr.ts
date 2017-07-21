@@ -25,6 +25,7 @@ export interface IServerManager {
     launchNewInstance() : Promise<sm.ServerInstance>;
     terminateInstance(InstanceId: ServerId, pid: number) : void;
     on(event: "instance-launching", listener: (InstanceId: ServerId, InstanceUrl: string) => void) : this;
+    on(event: "instance-launching-spawn-params", listener: (InstanceId: ServerId, spawnParams: SpawnParams) => void) : this;
     on(event: "instance-launched", listener: (InstanceId: ServerId) => void) : this;
     on(event: "instance-terminating", listener: (InstanceId: ServerId, pid: number) => void): this;
     on(event: "instance-terminated", listener: (InstanceId: ServerId) => void): this;
@@ -51,6 +52,7 @@ class ServerManager extends events.EventEmitter implements IServerManager {
     }
     private launchNewApiServerInstance(InstanceId: ServerId, Port: number) : Promise<number> {
         return this.spawnParamsSrc.get().then((spawnParams: SpawnParams) => {
+            this.emit("instance-launching-spawn-params", InstanceId, spawnParams);
             let args: string[] = (spawnParams.args ? spawnParams.args : []);
             let env:{[key: string]: string} = {};
             if (spawnParams.env) {
