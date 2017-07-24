@@ -24,4 +24,4 @@ router.use("/curr", getSetApiServerMiddleware((rqd: IRequestData) => rqd.StateMa
 router.use("/new", getSetApiServerMiddleware((rqd: IRequestData) => rqd.StateMachine.NewServer), serverRouter);
 router.use("/old", getSetApiServerMiddleware((rqd: IRequestData) => rqd.StateMachine.OldServer), serverRouter);
 
-serverRouter.get("/", JSONEndware<Server>((rqd: IRequestData) => Promise.resolve<Server>(rqd.get<Server>("APIServer"))));
+serverRouter.get("/", JSONEndware<Server>((rqd: IRequestData) => Promise.resolve<Server>(rqd.get<Server>("ApiServer"))));
