@@ -1,39 +1,28 @@
 import * as express from 'express';
 import {IGlobal} from "./global";
 import * as http from "http";
+import * as rqd from "request-data";
 import {IStateMachine, Server} from "./state-machine";
 import {ISettingsStore} from "./settings-store";
 import {SpawnParams} from "./server-mgr";
 
-interface RequestInfo {
-    apiServer?: Server;
+export interface IRequestData extends rqd.IRequestData<IGlobal> {
+    readonly StateMachine: IStateMachine;
+    readonly SpawnParamsStore: ISettingsStore<SpawnParams>
 }
 
-export type EndwareHandler<T> = (rqd: RequestData) => Promise<T>;
-
-export class RequestData {
-    constructor(public req: express.Request) {
-        if (!req["request_info"]) req["request_info"] = {};
-    }
-    private get RequestInfo() : RequestInfo {return this.req["request_info"];}
-    get Global(): IGlobal {return this.req.app.get("global");}
-    get Headers() : http.IncomingMessageHeaders {return this.req.headers;}
-    get Params() : any {return this.req.params;}
-    get Body() : any {return this.req.body;}
-    static Endware<T>(handler: EndwareHandler<T>) : express.RequestHandler {
-        return (req: express.Request, res: express.Response) => {
-            handler(new RequestData(req))
-            .then((value: T) => {
-                res.jsonp(value);
-            }).catch((err: any) => {
-                res.status(err.code ? err.code : 400).json(err);
-            });
-        };
-    }
-    
+class RequestData extends rqd.RequestData<IGlobal> implements IRequestData {
+    constructor(req: express.Request) {super(req);}
     get StateMachine() : IStateMachine {return this.Global.stateMachine;}
     get SpawnParamsStore(): ISettingsStore<SpawnParams> {return this.Global.spawnParamsStore;}
+}
 
-    get APIServer(): Server {return this.RequestInfo.apiServer;}
-    set APIServer(value: Server) {this.RequestInfo.apiServer = value;}
-} 
+export function get(req: express.Request) : IRequestData {return new RequestData(req);}
+
+export type JSONEndwareHandler<T> = rqd.JSONEndwareHandler<IRequestData, T>;
+
+let factory = (req: express.Request) => new RequestData(req);
+
+export function JSONEndware<T>(handler: JSONEndwareHandler<T>) : express.RequestHandler {
+    return rqd.JSONEndwareTemplete<IGlobal, IRequestData, T>(factory, handler);
+}

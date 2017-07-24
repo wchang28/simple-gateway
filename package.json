@@ -23,6 +23,7 @@
     "express-web-server": "https://github.com/wchang28/express-web-server.git",
     "lodash": "^4.17.4",
     "no-cache-express": "https://github.com/wchang28/no-cache-express.git",
+    "request-data": "https://github.com/wchang28/request-data.git",
     "shortid": "^2.2.8",
     "tree-kill": "^1.1.0"
   }

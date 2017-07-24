@@ -1,15 +1,15 @@
 // route /services
 import * as express from 'express';
 import * as core from 'express-serve-static-core';
-import {RequestData} from "../request-data";
+import {IRequestData, JSONEndware} from "../request-data";
 import {StateMachineJSON, State} from "../state-machine";
 import {Router as serverRouter} from "./server";
 
 let router = express.Router();
 export {router as Router};
 
-router.get("/", RequestData.Endware<StateMachineJSON>((rqd: RequestData) => Promise.resolve<StateMachineJSON>(rqd.StateMachine.toJSON())));
-router.get("/state", RequestData.Endware<State>((rqd: RequestData) => Promise.resolve<State>(rqd.StateMachine.State)));
-router.get("/deploy", RequestData.Endware<any>((rqd: RequestData) => rqd.StateMachine.deploy()));
-router.get("/reload", RequestData.Endware<any>((rqd: RequestData) => rqd.StateMachine.deploy()));
+router.get("/", JSONEndware<StateMachineJSON>((rqd: IRequestData) => Promise.resolve<StateMachineJSON>(rqd.StateMachine.toJSON())));
+router.get("/state", JSONEndware<State>((rqd: IRequestData) => Promise.resolve<State>(rqd.StateMachine.State)));
+router.get("/deploy", JSONEndware<any>((rqd: IRequestData) => rqd.StateMachine.deploy()));
+router.get("/reload", JSONEndware<any>((rqd: IRequestData) => rqd.StateMachine.deploy()));
 router.use("/server", serverRouter);
